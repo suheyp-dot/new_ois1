@@ -37,7 +37,6 @@ export default function OISScreen({ navigation }) {
           <View style={styles.avatarPlaceholder}>
             <Ionicons name="person" size={16} color="#1E293B" />
           </View>
-          <Ionicons name="chevron-down" size={16} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 

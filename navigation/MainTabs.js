@@ -27,10 +27,7 @@ export default function MainTabs() {
         tabBarIcon: ({ color, size }) => {
           let iconName;
           
-          if (route.name === 'Geri') {
-            iconName = 'arrow-back';
-            return <Ionicons name={iconName} size={size} color={color} />;
-          } else if (route.name === 'Anasayfa') {
+          if (route.name === 'Anasayfa') {
             iconName = 'home';
             return <Ionicons name={iconName} size={size} color={color} />;
           } else if (route.name === 'Haberler') {
@@ -43,7 +40,6 @@ export default function MainTabs() {
         },
       })}
     >
-      <Tab.Screen name="Geri" component={DummyScreen} />
       <Tab.Screen name="Anasayfa" component={DummyScreen} />
       <Tab.Screen name="Haberler" component={DummyScreen} />
       <Tab.Screen name="ois" component={OISScreen} />

@@ -1,9 +1,9 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { AuthContext } from '../context/AuthContext';
-import { API_BASE_URL } from '../constants/config';
-import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+import { useContext, useState } from 'react';
+import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { API_BASE_URL } from '../constants/config';
+import { AuthContext } from '../context/AuthContext';
 
 export default function LoginScreen() {
   const { login } = useContext(AuthContext);
@@ -28,7 +28,10 @@ export default function LoginScreen() {
 
       if (response.data && response.data.status === 'success') {
         const { token, KulAdSoyad } = response.data;
-        const user = { KulAdSoyad: KulAdSoyad || 'Öğrenci' };
+        const user = {
+          KulAdSoyad: KulAdSoyad || 'Öğrenci',
+          username: username
+        };
         await login(token, user);
       } else {
         const errorMsg = response.data.message || 'Giriş başarısız.';
@@ -46,17 +49,18 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          
+
           <View style={styles.headerContainer}>
-            {/* Placeholder logo */}
-            <View style={styles.logoPlaceholder}>
-              <Ionicons name="school" size={60} color="#1E293B" />
-            </View>
+            <Image
+              source={require('../assets/uni_min_logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
             <Text style={styles.headerTitle}>MUDANYA ÜNİVERSİTESİ</Text>
             <Text style={styles.headerSubtitle}>Öğrenci Bilgi Sistemi</Text>
           </View>
@@ -145,19 +149,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
   },
-  logoPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#E2E8F0',
-    alignItems: 'center',
-    justifyContent: 'center',
+  logoImage: {
+    width: 250,
+    height: 80,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   headerTitle: {
     fontSize: 22,

@@ -67,14 +67,15 @@ export const AuthProvider = ({ children }) => {
         return;
       }
       try {
-        const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-        token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+        const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId ?? '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
+        const pushTokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+        token = String(pushTokenData.data);
         console.log("Expo Push Token:", token);
         
         // Save token to our DB via PHP backend
-        await axios.post(`${API_BASE_URL}save_token.php`, {
-          id: user.student_id || user.id,
-          push_token: token
+        await axios.post('http://172.20.10.2/ois_api/save_token.php', {
+          username: user.username || 'suheyp.elahmed',
+          token: token
         });
         console.log("Token saved to DB successfully.");
 
@@ -98,8 +99,10 @@ export const AuthProvider = ({ children }) => {
       setUserData(safeUser);
       setIsLoggedIn(true);
 
-      // Register for push notifications
-      await registerForPushNotificationsAsync(safeUser);
+      // Register for push notifications without blocking the login flow
+      registerForPushNotificationsAsync(safeUser).catch(err => {
+        console.error('Push token registration error:', err);
+      });
 
     } catch (e) {
       console.error('Error storing login data:', e);
