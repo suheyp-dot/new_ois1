@@ -1,39 +1,8 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Animated, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-// 1. MOCK DATA UPDATE
-const mockResults = [
-  { 
-    id: '1', code: 'MUDU 143', name: 'Dünya Mutfakları', 
-    components: [
-      { name: 'Ara Sınavlar (Vize)', grade: 92, weight: 50 }, 
-      { name: 'Final', grade: null, weight: 50 }
-    ] 
-  },
-  { 
-    id: '2', code: 'BPR 102', name: 'Algoritma ve Programlama II', 
-    components: [
-      { name: 'Ödev 3', grade: 100, weight: 5 }, 
-      { name: 'Ödev 1', grade: 75, weight: 5 }, 
-      { name: 'Ödev 2', grade: 100, weight: 5 }, 
-      { name: 'Ara Sınavlar', grade: 67, weight: 20 }, 
-      { name: 'Final', grade: 85, weight: 40 }, 
-      { name: 'Devam', grade: 100, weight: 5 }, 
-      { name: 'Projeler', grade: 90, weight: 20 }
-    ] 
-  },
-  { 
-    id: '3', code: 'BPR 106', name: 'Ön Yüz Programlama', 
-    components: [
-      { name: 'Ara Sınavlar', grade: 45, weight: 40 }, 
-      { name: 'Devam', grade: 100, weight: 10 }, 
-      { name: 'Final', grade: 30, weight: 50 }
-    ] 
-  }
-];
-
-// 2. HELPER FUNCTIONS
+// 1. HELPER FUNCTIONS
 const calculateTotal = (components) => {
   let hasNull = false;
   let sum = 0;
@@ -159,12 +128,12 @@ const ExpandableCard = ({ item }) => {
             </View>
           </View>
         ))}
-        
+
         {result.isComplete && (
           <View style={styles.summaryRow}>
             <Text style={styles.summaryText}>
-              Ortalama: <Text style={{ fontWeight: 'bold' }}>{result.total}</Text> 
-              {'  '}→{'  '} 
+              Ortalama: <Text style={{ fontWeight: 'bold' }}>{result.total}</Text>
+              {'  '}→{'  '}
               Harf: <Text style={[styles.summaryLetter, { color: color }]}>{letter}</Text>
             </Text>
           </View>
@@ -175,6 +144,47 @@ const ExpandableCard = ({ item }) => {
 };
 
 export default function SinavSonuclariScreen({ navigation }) {
+  const [gradesData, setGradesData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchGrades();
+  }, []);
+
+  const fetchGrades = async () => {
+    try {
+      // NOTE: Replace YOUR_LOCAL_IP with your actual local IP address
+      // e.g., 'http://192.168.1.189/ois_api/get_grades.php'
+      const response = await fetch('http://172.20.10.2/ois_api/get_grades.php');
+      const dbData = await response.json();
+
+      // Mapping logic dynamically mapping 'ders_adi' from DB
+      const mappedResults = dbData.map((row, index) => {
+        // Helper to parse string values from DB to numbers or nulls
+        const parseGrade = (val) => (val !== null && val !== undefined && val !== "") ? Number(val) : null;
+
+        return {
+          id: row.id ? String(row.id) : String(index + 1),
+          code: 'BPR', // Generic code
+          name: row.ders_adi || 'Bilinmeyen Ders',
+          components: [
+            { name: 'Ara Sınavlar', grade: parseGrade(row.vize_sinavi), weight: 40 },
+            { name: 'Final', grade: parseGrade(row.final_sinavi), weight: 40 },
+            { name: 'Ödevler', grade: parseGrade(row.odevler), weight: 10 },
+            { name: 'Devam', grade: parseGrade(row.katilma), weight: 10 }
+          ]
+        };
+      });
+
+      setGradesData(mappedResults);
+    } catch (error) {
+      console.error('Notlar çekilirken hata oluştu:', error);
+      Alert.alert('Hata', 'Notlar yüklenirken bir sorun oluştu. IP adresini ve sunucuyu kontrol edin.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -193,13 +203,19 @@ export default function SinavSonuclariScreen({ navigation }) {
       </View>
 
       {/* List */}
-      <FlatList
-        data={mockResults}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ExpandableCard item={item} />}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-      />
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#3B82F6" />
+        </View>
+      ) : (
+        <FlatList
+          data={gradesData}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <ExpandableCard item={item} />}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </SafeAreaView>
   );
 }

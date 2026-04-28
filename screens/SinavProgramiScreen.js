@@ -2,54 +2,56 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const mockExams = [
+const mockData = [
   { id: '1', code: 'BPR254', name: 'Yapay Öğrenme', instructor: 'MUHAMMET FATİH ÇAKMAKÇI', date: '6 Nisan', day: 'Pazartesi', time: '10:00', location: 'LAB2', color: '#ff6b6b' },
   { id: '2', code: 'BPR104', name: 'Arka Yüz Programlama', instructor: 'SEVİM PİLAVCI', date: '7 Nisan', day: 'Salı', time: '16:00', location: 'LAB2', color: '#4facfe' },
-  { id: '3', code: 'BPR257', name: 'Proje Yönetimi', instructor: 'FERİT PEHLİVANOĞLU', date: '7 Nisan', day: 'Salı', time: '12:00', location: 'C106', color: '#f093fb' },
-  { id: '4', code: 'BPR102', name: 'Algoritma ve Programlama II', instructor: 'FERİT PEHLİVANOĞLU', date: '8 Nisan', day: 'Çarşamba', time: '12:00', location: 'LAB2', color: '#43e97b' },
-  { id: '5', code: 'BPR110', name: 'Veri Tabanı Yönetimi', instructor: 'FERİT PEHLİVANOĞLU', date: '9 Nisan', day: 'Perşembe', time: '12:00', location: 'LAB2', color: '#fa709a' },
-  { id: '6', code: 'BPR106', name: 'Ön Yüz Programlama', instructor: 'MUHAMMET FATİH ÇAKMAKÇI', date: '9 Nisan', day: 'Perşembe', time: '14:00', location: 'LAB2', color: '#12c2e9' }
+  { id: '3', code: 'BPR257', name: 'Proje Yönetimi', instructor: 'FERİT PEHLİVANOĞLU', date: '7 Nisan', day: 'Salı', time: '12:00', location: 'C106', color: '#f093fb' }
 ];
 
-export default function SinavProgramiScreen({ navigation }) {
-  const renderExamTicket = ({ item }) => {
-    // Split date into day number and month for better typography in the ticket stub
-    const [dayNum, monthStr] = item.date.split(' ');
+const TicketCard = ({ item }) => {
+  // Split date to show day number and month name separately
+  const [dayNum, monthName] = item.date.split(' ');
 
-    return (
-      <View style={styles.ticketCard}>
-        {/* Left Side: Tear-off Stub */}
-        <View style={[styles.ticketStub, { backgroundColor: item.color }]}>
-          <Text style={styles.stubDayNum}>{dayNum}</Text>
-          <Text style={styles.stubMonth}>{monthStr.toUpperCase()}</Text>
-          <View style={styles.stubDivider} />
-          <Text style={styles.stubDayName}>{item.day}</Text>
+  return (
+    <View style={styles.ticketContainer}>
+      {/* Left Side: Date Block */}
+      <View style={[styles.dateBlock, { backgroundColor: item.color }]}>
+        <Text style={styles.dateNumText}>{dayNum}</Text>
+        <Text style={styles.monthText}>{monthName}</Text>
+        <View style={styles.separator} />
+        <Text style={styles.dayNameText}>{item.day}</Text>
+      </View>
+
+      {/* Right Side: Details Block */}
+      <View style={styles.detailsBlock}>
+        <View style={styles.courseHeader}>
+          <Text style={styles.courseCode}>{item.code}</Text>
+        </View>
+        <Text style={styles.courseName} numberOfLines={2}>{item.name}</Text>
+        <View style={styles.instructorContainer}>
+          <Ionicons name="person-outline" size={14} color="#64748B" />
+          <Text style={styles.instructorName} numberOfLines={1}>{item.instructor}</Text>
         </View>
 
-        {/* Right Side: Details */}
-        <View style={styles.ticketDetails}>
-          <Text style={styles.courseName} numberOfLines={2}>{item.name}</Text>
-          <Text style={styles.courseCode}>{item.code}</Text>
-          <Text style={styles.instructorName} numberOfLines={1}>{item.instructor}</Text>
-
-          <View style={styles.badgeRow}>
-            <View style={styles.badge}>
-              <Ionicons name="time-outline" size={14} color="#64748B" />
-              <Text style={styles.badgeText}>{item.time}</Text>
-            </View>
-            <View style={styles.badge}>
-              <Ionicons name="location-outline" size={14} color="#64748B" />
-              <Text style={styles.badgeText}>{item.location}</Text>
-            </View>
+        <View style={styles.bottomRow}>
+          <View style={styles.infoItem}>
+            <Ionicons name="time-outline" size={16} color="#334155" />
+            <Text style={styles.infoText}>{item.time}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Ionicons name="location-outline" size={16} color="#334155" />
+            <Text style={styles.infoText}>{item.location}</Text>
           </View>
         </View>
       </View>
-    );
-  };
+    </View>
+  );
+};
 
+export default function SinavProgramiScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {/* Custom Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1E293B" />
@@ -58,17 +60,10 @@ export default function SinavProgramiScreen({ navigation }) {
         <View style={{ width: 24 }} />
       </View>
 
-      {/* Screen Title Area */}
-      <View style={styles.titleArea}>
-        <Text style={styles.mainTitle}>2025-26 Bahar Yarıyılı Ara Sınavları</Text>
-        <Text style={styles.subTitle}>Meslek Yüksekokulu</Text>
-      </View>
-
-      {/* List */}
       <FlatList
-        data={mockExams}
+        data={mockData}
         keyExtractor={(item) => item.id}
-        renderItem={renderExamTicket}
+        renderItem={({ item }) => <TicketCard item={item} />}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
       />
@@ -99,110 +94,104 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1E293B',
   },
-  titleArea: {
-    padding: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
-  },
-  mainTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1E293B',
-    marginBottom: 4,
-  },
-  subTitle: {
-    fontSize: 14,
-    color: '#64748B',
-    fontWeight: '500',
-  },
   listContainer: {
     padding: 16,
     paddingBottom: 32,
   },
-  ticketCard: {
+  ticketContainer: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     marginBottom: 16,
-    overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 5,
+    overflow: 'hidden', // Ensures the colored block corners match the card border radius
   },
-  ticketStub: {
-    width: 80,
+  dateBlock: {
+    width: 90,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 4,
+    paddingVertical: 20,
+    paddingHorizontal: 8,
   },
-  stubDayNum: {
+  dateNumText: {
     fontSize: 28,
     fontWeight: '900',
     color: '#FFFFFF',
-    marginBottom: -4,
   },
-  stubMonth: {
-    fontSize: 12,
-    fontWeight: 'bold',
+  monthText: {
+    fontSize: 15,
+    fontWeight: '700',
     color: '#FFFFFF',
-    opacity: 0.9,
+    marginBottom: 8,
   },
-  stubDivider: {
-    width: 30,
+  separator: {
+    width: 24,
     height: 2,
-    backgroundColor: '#FFFFFF',
-    opacity: 0.4,
-    marginVertical: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    marginBottom: 8,
   },
-  stubDayName: {
-    fontSize: 11,
+  dayNameText: {
+    fontSize: 12,
     fontWeight: '600',
     color: '#FFFFFF',
-    textAlign: 'center',
+    textTransform: 'uppercase',
   },
-  ticketDetails: {
+  detailsBlock: {
     flex: 1,
     padding: 16,
     justifyContent: 'space-between',
   },
-  courseName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#0F172A',
-    marginBottom: 2,
+  courseHeader: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginBottom: 8,
   },
   courseCode: {
     fontSize: 12,
     fontWeight: 'bold',
     color: '#3B82F6',
+  },
+  courseName: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#0F172A',
     marginBottom: 6,
+  },
+  instructorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   instructorName: {
     fontSize: 13,
     color: '#64748B',
-    marginBottom: 12,
+    fontWeight: '500',
+    marginLeft: 6,
   },
-  badgeRow: {
+  bottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    paddingTop: 12,
+    marginTop: 'auto',
   },
-  badge: {
+  infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    marginRight: 8,
+    marginRight: 20,
   },
-  badgeText: {
-    fontSize: 12,
-    color: '#475569',
+  infoText: {
+    fontSize: 14,
     fontWeight: '600',
-    marginLeft: 4,
+    color: '#334155',
+    marginLeft: 6,
   },
 });
